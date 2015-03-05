@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * Implements hook_permission().
+ */
+function multisite_ui_permission() {
+  return array(
+    'create sub-site' =>  array(
+      'title' => t('Create sub site'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function multisite_ui_menu() {
+  $items['multisite/add'] = array(
+    'title' => 'Create site',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('multisite_ui_create_form'),
+    'access arguments' => array('create sub-site'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function multisite_ui_create_form($form, &$form_state) {
+  $form = array();
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create'),
+  );
+
+  return $form;
+}
+
+function multisite_ui_create_form_submit($form, &$form_state) {
+  //needs apache hosts file configuration (unless sub domain *.example.com); /etc/hosts file
+  //permissions: database user able to create databases.
+  //Execute drush command
+  //drush si minimal --db-url=mysql://root:@127.0.0.1:33067/drupalx_min3 --sites-subdir=min3.drupalx-in-a-box.dd -y
+  //drush isn't updating sites.php file. so use --sites-subdir as the domain name
+}
+
