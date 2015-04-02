@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file multisite_ui.install
+ *
+ * Handles the install, uninstall and updating of Multisite UI
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function multisite_ui_schema() {
+  $schema['multisite_ui'] = array(
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a site.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+  	  'uid' => array(
+        'description' => 'The {users}.uid that owns this site; initially, this is the user that created it.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'title' => array(
+        'description' => 'The title of this site, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'description' => 'A description of the site.',
+        'translatable' => TRUE,
+      ),
+      'version' => array(
+        'description' => 'The Drupal version of this site.',
+        'type' => 'varchar',
+        'length' => 5,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'profile' => array(
+        'description' => 'The profile of this site.',
+        'type' => 'varchar',
+        'length' => 105,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the site was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function multisite_ui_uninstall() {
+  // Clear variables
+  variable_del('multisite_ui_db_host');
+  variable_del('multisite_ui_db_port');
+  variable_del('multisite_ui_db_user');
+  variable_del('multisite_ui_drush_path');
+  variable_del('multisite_ui_drupal8_path');
+}

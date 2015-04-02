@@ -22,11 +22,65 @@ function multisite_ui_menu() {
     'access arguments' => array('create sub-site'),
     'type' => MENU_CALLBACK,
   );
+  $items['admin/config/multisite'] = array(
+    'title' => 'Multisite Configuration',
+    'description' => 'Configure the settings for multisite',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('multisite_ui_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'multisite_ui.admin.inc',
+  );
   return $items;
 }
 
 function multisite_ui_create_form($form, &$form_state) {
   $form = array();
+  $form['multisite_ui_site_name'] = array(
+    '#title' => t('Site name'), 
+    '#type' => 'textfield', 
+    '#required' => TRUE, 
+    '#description' => t('Name of the site'), 
+  );
+  global $base_url;
+  $base_url_arr = parse_url($base_url);
+  $site_host = $base_url_arr['host'];
+  $form['multisite_ui_site_machine_name'] = array( // The machine name Field which will take the value from Source field and convert it to machine friendly name.
+    '#type' => 'machine_name',
+    '#title' => t("Site url"),
+    '#required' => TRUE,
+    '#field_prefix' => 'http://',
+    '#field_suffix' => ".$site_host",
+    '#description' => t("machine-friendly name."),
+    '#size' => 15,
+    '#maxlength' => 15,
+    '#default_value' => "",
+    '#machine_name' => array(
+      'exists' => '_drupalst_com_check_machine_name_if_exist',  // function that return 1 if the machine name is duplicated .
+      'source' => array('multisite_ui_site_name'), 	// the name of the source field that we will Take the User Friendly name from and convert it to Machine Friedly name
+    ),
+  );
+  $form['multisite_ui_site_desc'] = array(
+    '#title' => t('Site Description'), 
+    '#type' => 'textarea', 
+    '#description' => t('more details about the site.'), 
+  );
+  $profiles = multisite_ui_find_profiles();
+  $options = array();
+  foreach ($profiles as $key => $value){
+    $options["D7-$key"] = "D7 $key";
+  }
+  $profiles = multisite_ui_find_profiles_in_d8();
+  foreach ($profiles as $key => $value){
+    $options["D8-$key"] = "D8 $key";
+  }
+  //Hide if profile is mentioned as URL parameter
+  $form['profiles'] = array(
+    '#type' => 'radios',
+    '#title' => t('Drupal profile'),
+    '#default_value' => "D7-standard",
+    '#options' => $options,
+    '#description' => t('Which Drupal profile you want your site to base on?'),
+  );
   $form['submit_button'] = array(
     '#type' => 'submit',
     '#value' => t('Create'),
@@ -36,10 +90,71 @@ function multisite_ui_create_form($form, &$form_state) {
 }
 
 function multisite_ui_create_form_submit($form, &$form_state) {
-  //needs apache hosts file configuration (unless sub domain *.example.com); /etc/hosts file
+  /*
+   * needs apache hosts file configuration (unless sub domain *.example.com); 
+   * /etc/hosts file 
+   * ServerAlias *.drupalx-in-a-box.dd
+   */
   //permissions: database user able to create databases.
   //Execute drush command
   //drush si minimal --db-url=mysql://root:@127.0.0.1:33067/drupalx_min3 --sites-subdir=min3.drupalx-in-a-box.dd -y
   //drush isn't updating sites.php file. so use --sites-subdir as the domain name
+  
+  $selected_profile = $form_state["values"]['profiles'];
+  $site_title = $form_state["values"]['multisite_ui_site_name'];
+  $site_unique_name = $form_state["values"]['multisite_ui_site_machine_name'];
+  $selected_profile_arr = explode("-",$selected_profile);
+  $drupal_version = $selected_profile_arr[0];
+  $profile = $selected_profile_arr[1];
+  $drush_bin = variable_get('multisite_ui_drush_path', '/Applications/Dev\ Desktop/drush/');
+  $db_host = variable_get('multisite_ui_db_host', '127.0.0.1');
+  $db_port = variable_get('multisite_ui_db_port', '33067');
+  $db_user = variable_get('multisite_ui_db_user', 'root');
+  $db_prefix = variable_get('multisite_ui_db_prefix', '');
+  if(!empty($db_prefix)){
+    $db_prefix = $db_prefix."_";
+  }
+  global $base_url;
+  $base_url_arr = parse_url($base_url);
+  $site_host = $base_url_arr['host'];
+  
+  global $user;
+  $user_name = $user->name;
+  
+  $drupal8_root_dir = variable_get('multisite_ui_drupal8_path', '/Users/TechNikh/Downloads/drupal-8.0.0-beta4');
+  
+  $exec_cmd = "{$drush_bin}drush si $profile --db-url=mysql://{$db_user}:@{$db_host}:{$db_port}/{$db_prefix}{$site_unique_name} --sites-subdir={$site_unique_name}.{$site_host} -y 2>&1";
+  if(!empty($drupal8_root_dir) && ($drupal_version == "D8")){
+    $exec_cmd = "cd $drupal8_root_dir && ".$exec_cmd;
+  }elseif(empty($drupal8_root_dir) && ($drupal_version == "D8")){
+    drupal_set_message("Please configure Drupal8 path");
+    return "";
+  }
+
+  $out = exec($exec_cmd);
+  db_insert('multisite_ui')
+    ->fields(array(
+      'uid' => $user->uid,
+      'title' => $site_title,
+      'description' => $form_state["values"]['multisite_ui_site_desc'],
+      'version' => $drupal_version,
+      'profile' => $profile,
+      'created' => REQUEST_TIME,
+    ))
+    ->execute();
+  watchdog("multisite_ui", $out);
+  drupal_set_message("Site creation completed");
 }
 
+function multisite_ui_find_profiles() {
+  return file_scan_directory('./profiles', '/\.profile$/', array('key' => 'name'));
+}
+
+function multisite_ui_find_profiles_in_d8() {
+  $drupal8_root_dir = variable_get('multisite_ui_drupal8_path', '/Users/TechNikh/Downloads/drupal-8.0.0-beta4');
+  return file_scan_directory("$drupal8_root_dir/core/profiles", '/\.profile$/', array('key' => 'name'));
+}
+
+function _drupalst_com_check_machine_name_if_exist($site_machine_name){
+  return 0;
+}
