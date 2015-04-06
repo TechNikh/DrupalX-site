@@ -3,13 +3,15 @@ description = Leadership ladder for learning about and contributing to Drupal.
 core = 7.x
 package = Drupal Ladder
 php = 5.2.4
-project = Ladder
+version = 7.x-1.0-alpha7
+project = ladder
 dependencies[] = ctools
 dependencies[] = entityreference
 dependencies[] = features
 dependencies[] = lessons_completed
 dependencies[] = lessons_lesson
 dependencies[] = strongarm
+datestamp = 1359944475
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:1
 features[field][] = node-ladder-field_ladder_maintainers
@@ -28,10 +30,4 @@ features[variable][] = menu_parent_ladder
 features[variable][] = node_options_ladder
 features[variable][] = node_preview_ladder
 features[variable][] = node_submitted_ladder
-
-; Information added by drupal.org packaging script on 2012-12-04
-version = "7.x-1.0-alpha6"
-core = "7.x"
-project = "ladder"
-datestamp = "1354582055"
-
+mtime = 1359944475

@@ -10,7 +10,6 @@
 function ladder_field_default_fields() {
   $fields = array();
 
-
   // Exported field: 'node-ladder-field_ladder_maintainers'.
   $fields['node-ladder-field_ladder_maintainers'] = array(
     'field_config' => array(
@@ -20,11 +19,11 @@ function ladder_field_default_fields() {
       'entity_types' => array(),
       'field_name' => 'field_ladder_maintainers',
       'foreign keys' => array(
-        'node' => array(
+        'users' => array(
           'columns' => array(
-            'target_id' => 'nid',
+            'target_id' => 'uid',
           ),
-          'table' => 'node',
+          'table' => 'users',
         ),
       ),
       'indexes' => array(
@@ -246,7 +245,7 @@ function ladder_field_default_fields() {
       'display' => array(
         'default' => array(
           'label' => 'above',
-          'module' => 'entityreference',
+          'module' => 'ladder',
           'settings' => array(
             'link' => FALSE,
           ),
@@ -284,12 +283,8 @@ function ladder_field_default_fields() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Ladder Maintainers');
-  t('Ladder Sections');
   t('Lessons');
-  t('Optional title for this section.');
   t('Overview');
-  t('Section Title');
-  t('Sections of the Ladder. Each section can have a title and multiple Lessons. This list will be reversed when displayed as a ladder, so the most basic lessons should be at the top.');
 
   return $fields;
 }
