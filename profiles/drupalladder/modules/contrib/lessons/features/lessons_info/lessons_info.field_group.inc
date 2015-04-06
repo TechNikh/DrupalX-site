@@ -34,7 +34,7 @@ function lessons_info_field_group_info() {
       'label' => 'Lesson info',
       'instance_settings' => array(
         'required_fields' => 1,
-        'classes' => '',
+        'classes' => ' group-lesson-info field-group-fieldset',
         'description' => '',
       ),
       'formatter' => 'collapsed',

@@ -10,7 +10,7 @@
 function lessons_info_field_default_fields() {
   $fields = array();
 
-  // Exported field: 'node-lesson-field_lesson_drupal_version'
+  // Exported field: 'node-lesson-field_lesson_drupal_version'.
   $fields['node-lesson-field_lesson_drupal_version'] = array(
     'field_config' => array(
       'active' => '1',
@@ -24,6 +24,7 @@ function lessons_info_field_default_fields() {
           0 => 'value',
         ),
       ),
+      'locked' => '0',
       'module' => 'list',
       'settings' => array(
         'allowed_values' => array(
@@ -72,7 +73,7 @@ function lessons_info_field_default_fields() {
     ),
   );
 
-  // Exported field: 'node-lesson-field_lesson_project_name'
+  // Exported field: 'node-lesson-field_lesson_project_name'.
   $fields['node-lesson-field_lesson_project_name'] = array(
     'field_config' => array(
       'active' => '1',
@@ -93,6 +94,7 @@ function lessons_info_field_default_fields() {
           0 => 'format',
         ),
       ),
+      'locked' => '0',
       'module' => 'text',
       'settings' => array(
         'max_length' => '255',
@@ -139,7 +141,7 @@ function lessons_info_field_default_fields() {
     ),
   );
 
-  // Exported field: 'node-lesson-field_lesson_project_type'
+  // Exported field: 'node-lesson-field_lesson_project_type'.
   $fields['node-lesson-field_lesson_project_type'] = array(
     'field_config' => array(
       'active' => '1',
@@ -153,6 +155,7 @@ function lessons_info_field_default_fields() {
           0 => 'value',
         ),
       ),
+      'locked' => '0',
       'module' => 'list',
       'settings' => array(
         'allowed_values' => array(
@@ -203,7 +206,7 @@ Other: Not core or contrib',
     ),
   );
 
-  // Exported field: 'node-lesson-field_lesson_tags'
+  // Exported field: 'node-lesson-field_lesson_tags'.
   $fields['node-lesson-field_lesson_tags'] = array(
     'field_config' => array(
       'active' => '1',
@@ -224,6 +227,7 @@ Other: Not core or contrib',
           0 => 'tid',
         ),
       ),
+      'locked' => '0',
       'module' => 'taxonomy',
       'settings' => array(
         'allowed_values' => array(
@@ -276,7 +280,7 @@ Other: Not core or contrib',
     ),
   );
 
-  // Exported field: 'node-lesson-field_lesson_type'
+  // Exported field: 'node-lesson-field_lesson_type'.
   $fields['node-lesson-field_lesson_type'] = array(
     'field_config' => array(
       'active' => '1',
@@ -290,6 +294,7 @@ Other: Not core or contrib',
           0 => 'value',
         ),
       ),
+      'locked' => '0',
       'module' => 'list',
       'settings' => array(
         'allowed_values' => array(
