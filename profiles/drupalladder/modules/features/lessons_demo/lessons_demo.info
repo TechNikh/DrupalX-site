@@ -1,0 +1,11 @@
+name = Lessons: demo
+description = Provides ways to evaluate lessons on demo environments
+core = 7.x
+package = Lessons
+php = 5.2.4
+version = 7.x-1.0-alpha1
+project = lessons_demo
+dependencies[] = lessons
+dependencies[] = multisite_ui
+features[features_api][] = api:1
+mtime = 1428355903
