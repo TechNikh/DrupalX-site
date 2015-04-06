@@ -10,7 +10,7 @@
 function lessons_prerequisites_field_default_fields() {
   $fields = array();
 
-  // Exported field: 'node-lesson-field_lesson_prerequisites'
+  // Exported field: 'node-lesson-field_lesson_prerequisites'.
   $fields['node-lesson-field_lesson_prerequisites'] = array(
     'field_config' => array(
       'active' => '1',
@@ -31,6 +31,7 @@ function lessons_prerequisites_field_default_fields() {
           0 => 'format',
         ),
       ),
+      'locked' => '0',
       'module' => 'text',
       'settings' => array(),
       'translatable' => '0',

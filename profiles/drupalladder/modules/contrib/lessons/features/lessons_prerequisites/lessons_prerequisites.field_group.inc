@@ -30,7 +30,7 @@ function lessons_prerequisites_field_group_info() {
       'label' => 'Prerequisites',
       'instance_settings' => array(
         'required_fields' => 1,
-        'classes' => '',
+        'classes' => ' group-prerequisites field-group-fieldset',
         'description' => '',
       ),
       'formatter' => 'collapsed',
