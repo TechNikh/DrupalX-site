@@ -30,7 +30,7 @@ function lessons_maintainers_field_group_info() {
       'label' => 'Maintainers',
       'instance_settings' => array(
         'required_fields' => 1,
-        'classes' => '',
+        'classes' => ' group-lesson-maintainers field-group-fieldset',
         'description' => '',
       ),
       'formatter' => 'collapsed',

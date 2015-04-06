@@ -10,7 +10,7 @@
 function lessons_maintainers_field_default_fields() {
   $fields = array();
 
-  // Exported field: 'node-lesson-field_lesson_maintainers'
+  // Exported field: 'node-lesson-field_lesson_maintainers'.
   $fields['node-lesson-field_lesson_maintainers'] = array(
     'field_config' => array(
       'active' => '1',
@@ -31,6 +31,7 @@ function lessons_maintainers_field_default_fields() {
           0 => 'target_id',
         ),
       ),
+      'locked' => '0',
       'module' => 'entityreference',
       'settings' => array(
         'handler' => 'base',
