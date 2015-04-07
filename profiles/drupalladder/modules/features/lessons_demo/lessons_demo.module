@@ -3,3 +3,56 @@
  * @file
  * Drupal needs this blank file.
  */
+
+function lessons_demo_block_info() {
+  $blocks = array();
+
+  $blocks['lesson_demo_multisites'] = array(
+    'info' => t('Lesson demo multisites'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+  );
+
+  return $blocks;
+}
+
+function lessons_demo_block_view($delta = '') {
+  $block = array();
+
+  switch($delta) {
+    case 'lesson_demo_multisites':
+      $block['subject'] = 'Demo';
+      $block['content'] = lessons_demo_multisites_block_callback();
+      break;
+  }
+
+  return $block;
+}
+
+function lessons_demo_multisites_block_callback(){
+  $output = "";
+  //get Drupal version & profile from corresponding Ladder.
+  //If the lesson is shared by multiple ladders? pick the first published one or loop through all available options
+  if(arg(0)!= "node"){
+    return "";
+  }
+  $lesson_nid = arg(1);
+  $ladder_nid = db_select("field_data_field_lessons", "le")
+    ->fields("le", array("entity_id"))
+    ->condition("field_lessons_target_id", $lesson_nid)
+    ->execute()
+    ->fetchField();
+  $ladder_node = node_load($ladder_nid);
+  dsm($ladder_node);
+  $d_version = lessons_demo_get_field_value($ladder_node, "field_ladder_drupal_version");
+  $d_profile = lessons_demo_get_field_value($ladder_node, "field_ladder_dist_profile");
+  $output .= l("Create new site", "multisite/add", array('query' => array('profile' => "d{$d_version}-{$d_profile}")));
+  return $output;
+}
+
+function lessons_demo_get_field_value($node, $field){
+  if(isset($node->{$field}[LANGUAGE_NONE]) && !empty($node->{$field}[LANGUAGE_NONE][0]['value'])){
+    return $node->{$field}[LANGUAGE_NONE][0]['value'];
+  }else{
+    return '';
+  }
+}
