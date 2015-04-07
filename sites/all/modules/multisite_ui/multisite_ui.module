@@ -117,22 +117,35 @@ function multisite_ui_create_form_submit($form, &$form_state) {
   global $base_url;
   $base_url_arr = parse_url($base_url);
   $site_host = $base_url_arr['host'];
-  
+  if($drupal_version == "D8"){
+    $site_host = "drupal8x.org";
+  }
   global $user;
   $user_name = $user->name;
   
   $drupal8_root_dir = variable_get('multisite_ui_drupal8_path', '/Users/TechNikh/Downloads/drupal-8.0.0-beta4');
   
-  $exec_cmd = "{$drush_bin}drush si $profile --db-url=mysql://{$db_user}:@{$db_host}:{$db_port}/{$db_prefix}{$site_unique_name} --sites-subdir={$site_unique_name}.{$site_host} -y 2>&1";
+  $exec_cmd = "{$drush_bin}drush si $profile --db-url=mysql://{$db_user}:linaro@{$db_host}:{$db_port}/{$db_prefix}{$site_unique_name} --sites-subdir={$site_unique_name}.{$site_host} -y 2>&1";
   if(!empty($drupal8_root_dir) && ($drupal_version == "D8")){
-    $exec_cmd = "cd $drupal8_root_dir && ".$exec_cmd;
+$out = exec("mkdir {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} 2>&1");
+dsm($out);
+$out = exec("cp {$drupal8_root_dir}/sites/default/default.services.yml {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
+dsm($out);
+$out = exec("chmod 666 {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
+dsm($out);   
+ $exec_cmd = "cd $drupal8_root_dir && ".$exec_cmd;
   }elseif(empty($drupal8_root_dir) && ($drupal_version == "D8")){
     drupal_set_message("Please configure Drupal8 path");
     return "";
   }
+dsm($exec_cmd);
 
   $out = exec($exec_cmd);
-  db_insert('multisite_ui')
+dsm($out);  
+  //Get login link
+$out = exec("cd {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} && {$drush_bin}drush uli 2>&1");
+drupal_set_message($out);
+db_insert('multisite_ui')
     ->fields(array(
       'uid' => $user->uid,
       'title' => $site_title,
