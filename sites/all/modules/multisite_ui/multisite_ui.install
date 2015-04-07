@@ -31,6 +31,13 @@ function multisite_ui_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'uri' => array(
+        'description' => 'The URL of this site.',
+        'type' => 'varchar',
+        'length' => 555,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'description' => array(
         'type' => 'text',
         'not null' => FALSE,

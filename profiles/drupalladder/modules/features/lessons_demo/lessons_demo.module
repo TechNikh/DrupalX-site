@@ -45,7 +45,23 @@ function lessons_demo_multisites_block_callback(){
   dsm($ladder_node);
   $d_version = lessons_demo_get_field_value($ladder_node, "field_ladder_drupal_version");
   $d_profile = lessons_demo_get_field_value($ladder_node, "field_ladder_dist_profile");
-  $output .= l("Create new site", "multisite/add", array('query' => array('profile' => "d{$d_version}-{$d_profile}")));
+  $output .= l("Create new site", "multisite/add", array('query' => array('profile' => "D{$d_version}-{$d_profile}")));
+  //Get related sites of current user
+  global $user;
+  $query = db_select("multisite_ui", "site");
+  $query
+    ->fields("site", array("title", "id"))
+    ->condition("site.uid", $user->uid)
+    ->condition("site.version", "D{$d_version}")
+    ->condition("site.profile", $d_profile);
+  $result = $query->execute();
+  $items = array();
+  while($record = $result->fetchAssoc()) {
+    $items[] = array(
+      'data' => l($record['title'], "site/".$record['id']),
+    );
+  }
+  $output .= theme_item_list(array('items' => $items, 'title' => "My existing sites", 'type' => "ul", 'attributes' => array()));
   return $output;
 }
 

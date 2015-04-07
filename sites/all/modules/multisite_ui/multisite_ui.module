@@ -30,7 +30,52 @@ function multisite_ui_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'multisite_ui.admin.inc',
   );
+  $items['site/%'] = array(
+    'title' => 'Sub site',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('multisite_ui_site_login_form', 1),
+    'access arguments' => array('create sub-site'),
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+function multisite_ui_site_login_form($form, &$form_state, $site_id) {
+  $form = array();
+  dsm($site_id);
+  //Get site title , URL & Description of site
+  $query = db_select("multisite_ui", "site");
+  $query
+    ->fields("site", array("title", "uri", "description"))
+    ->condition("site.id", $site_id);
+  $result = $query->execute();
+  $record = $result->fetchAssoc();
+  drupal_set_title($record['title']);
+  $site_url = "http://".$record['uri'];
+  $form['url'] = array(
+    '#markup' => '<strong>URL: </strong>'.l($site_url, $site_url),
+    '#suffix' => '<br/>'
+  );
+  $form['description'] = array( 
+    '#markup' => $record['description'],
+    '#suffix' => '<br/>'
+  );
+  $form['uri'] = array('#type' => 'value', '#value' => $record['uri']);
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Login'),
+  );
+
+  return $form;
+}
+
+function multisite_ui_site_login_form_submit($form, &$form_state) {
+  $drupal8_root_dir = variable_get('multisite_ui_drupal8_path', '');
+  $drush_bin = variable_get('multisite_ui_drush_path', '/Applications/Dev\ Desktop/drush/');
+  $uli_reset_link = exec("cd {$drupal8_root_dir}/sites/{$form_state["values"]['uri']} && {$drush_bin}drush uli 2>&1");
+  $site_host = "drupal8x.org";
+  $uli_reset_link = str_replace($site_host, "{$site_host}/index.php", $uli_reset_link);
+  drupal_goto($uli_reset_link);
 }
 
 function multisite_ui_create_form($form, &$form_state) {
@@ -81,6 +126,10 @@ function multisite_ui_create_form($form, &$form_state) {
     '#options' => $options,
     '#description' => t('Which Drupal profile you want your site to base on?'),
   );
+  if(isset($_GET['profile']) && !empty($_GET['profile'])){
+    $form['profiles']['#default_value'] = $_GET['profile'];
+    $form['profiles']['#disabled'] = TRUE;
+  }
   $form['submit_button'] = array(
     '#type' => 'submit',
     '#value' => t('Create'),
@@ -127,28 +176,27 @@ function multisite_ui_create_form_submit($form, &$form_state) {
   
   $exec_cmd = "{$drush_bin}drush si $profile --db-url=mysql://{$db_user}:linaro@{$db_host}:{$db_port}/{$db_prefix}{$site_unique_name} --sites-subdir={$site_unique_name}.{$site_host} -y 2>&1";
   if(!empty($drupal8_root_dir) && ($drupal_version == "D8")){
-$out = exec("mkdir {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} 2>&1");
-dsm($out);
-$out = exec("cp {$drupal8_root_dir}/sites/default/default.services.yml {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
-dsm($out);
-$out = exec("chmod 666 {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
-dsm($out);   
- $exec_cmd = "cd $drupal8_root_dir && ".$exec_cmd;
+    $out = exec("mkdir {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} 2>&1");
+    $out = exec("cp {$drupal8_root_dir}/sites/default/default.services.yml {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
+    $out = exec("chmod 666 {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host}/services.yml 2>&1");
+    $exec_cmd = "cd $drupal8_root_dir && ".$exec_cmd;
   }elseif(empty($drupal8_root_dir) && ($drupal_version == "D8")){
     drupal_set_message("Please configure Drupal8 path");
     return "";
   }
-dsm($exec_cmd);
 
-  $out = exec($exec_cmd);
-dsm($out);  
+  $out = exec($exec_cmd); 
   //Get login link
-$out = exec("cd {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} && {$drush_bin}drush uli 2>&1");
-drupal_set_message($out);
-db_insert('multisite_ui')
+  $uli_reset_link = exec("cd {$drupal8_root_dir}/sites/{$site_unique_name}.{$site_host} && {$drush_bin}drush uli 2>&1");
+  //make the url work in non clean url environment
+  if($drupal_version == "D8"){
+    $uli_reset_link = str_replace($site_host, "{$site_host}/index.php", $uli_reset_link);
+  }
+  db_insert('multisite_ui')
     ->fields(array(
       'uid' => $user->uid,
       'title' => $site_title,
+      'uri' =>"{$site_unique_name}.{$site_host}",
       'description' => $form_state["values"]['multisite_ui_site_desc'],
       'version' => $drupal_version,
       'profile' => $profile,
@@ -157,6 +205,7 @@ db_insert('multisite_ui')
     ->execute();
   watchdog("multisite_ui", $out);
   drupal_set_message("Site creation completed");
+  drupal_goto($uli_reset_link);
 }
 
 function multisite_ui_find_profiles() {
